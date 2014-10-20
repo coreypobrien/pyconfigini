@@ -4,7 +4,7 @@ An .ini file parser that follows the same rules as Zend_Config_Ini
 for details) with the exception that the comment character is '#'
 instead of ';'.
 
-Values are converted to Python types where possible and returned as 
+Values are converted to Python types where possible and returned as
 strings otherwise (i.e. 834 will convert to an int, but /some/path
 will convert to a string).
 
@@ -22,14 +22,16 @@ default = '__default__'
 reg_sec = re.compile('\[\s?([\w]+)\s?\]', re.IGNORECASE)
 reg_isec = re.compile('\[\s?([\w]+)\s?:\s?([\w]+)\s?\]', re.IGNORECASE)
 
+
 def parse_ini(ini_path, env=None):
-    
+
     ini = _Obj({default: _Obj()})
     current_section = default
     with open(ini_path) as f:
         for line in f:
             line = line.strip()
-            if not line or line.isspace() or line[0] == '#': continue
+            if not line or line.isspace() or line[0] == '#':
+                continue
             if line[0] == '[':
                 res = reg_sec.search(line)
                 if res is not None:
@@ -59,12 +61,13 @@ def parse_ini(ini_path, env=None):
                         if val not in working_obj:
                             working_obj[val] = _Obj()
                         working_obj = working_obj[val]
-        
+
         if env is not None:
             if env not in ini:
                 raise MissingSectionError('The section being loaded does not exist.')
             return ini[env]
         return ini
+
 
 def _cast(val):
     try:
@@ -72,14 +75,15 @@ def _cast(val):
     except:
         pass
     return val
-        
+
+
 class _Obj(OrderedDict):
     """ A dict that allows for object-like property access syntax.
     """
     def __copy__(self):
         data = self.__dict__.copy()
         return _Obj(data)
-    
+
     def __getattr__(self, name):
         try:
             return self[name]
@@ -88,6 +92,7 @@ class _Obj(OrderedDict):
                 return self[default][name]
             except KeyError:
                 raise AttributeError(name)
+
 
 class MissingSectionError(Exception):
     """ Thrown when a section header inherits from a section
